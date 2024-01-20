@@ -8,6 +8,7 @@ var playerId;
 var players = [];
 
 var board;
+var colormap;
 
 var available = true;
 var x = 0;
@@ -18,17 +19,11 @@ var currentPosition, lastPosition;
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 
-function preload() {
-  
-}
-var vol;
-var samples;
-
 function setup() {
   createCanvas(WIDTH, HEIGHT);
   frameRate()
   
-  socket = io.connect('http://localhost'); // frajelly.raspberryip.com | localhost
+  socket = io.connect('http://192.168.0.11'); // frajelly.raspberryip.com | localhost
   socket.on('connect', () => {
     playerId = socket.id; // an alphanumeric id
     $("#loader").fadeOut("slow");
@@ -37,7 +32,8 @@ function setup() {
   
   /// Client events
   socket.on("heartbeat", players => updatePlayers(players));
-  socket.on("updateBoard", board => updateBoard(board));
+  socket.on("updateBoard", data => updateBoard(data.board, data.colormap));
+  socket.on("color", color => setColor(color));
   socket.on("boardSize", size => setBoardSize(size));
   socket.on("showMessage", message => alert(message));
   socket.on("disconnect", playerId => removePlayer(playerId));
@@ -46,8 +42,8 @@ function setup() {
 function draw() {
   background(100,0,220,200);
   
-  if(board != null)
-    board.draw();
+  if(board != null && colormap != null && colormap.size > 0)
+    board.draw(colormap);
   
   for (let i = 0; i < players.length; i++) {
     players[i].draw();
@@ -56,8 +52,8 @@ function draw() {
   if(board != null && getPlayer(playerId) != null) {
     let player = getPlayer(playerId)
 
-    let direction = { x:(mouseX*1.0/WIDTH-player.x),
-                      y:(mouseY*1.0/HEIGHT-player.y)}
+    let direction = {x:(mouseX*1.0/WIDTH-player.x),
+                     y:(mouseY*1.0/HEIGHT-player.y)}
     var move = {direction: direction};
     
     board.claim(player.x, player.y, player.radius, player.id);
@@ -100,8 +96,9 @@ function setBoardSize(size) {
   board = new Board(size);
 }
 
-function updateBoard(newBoard) {
+function updateBoard(newBoard, jsonMap) {
   board.update(newBoard);
+  colormap = new Map(JSON.parse(jsonMap));
 }
 
 ////////////////////////////////////////////////////////////////// PLAYERS LOGIC
@@ -154,9 +151,8 @@ function updateId(id) {
 ////////////////////////////////////////////////////////////////// MOUSE EVENTS
 
 function mousePressed() {
-  if(available)
-  {
-    console.log(board)
+  if(available) {
+    console.log(colormap, board.board);
   }
 }
 
@@ -167,7 +163,7 @@ function mouseReleased() {
 }
 
 function keyPressed(){
-  if (key == ' '){ //this means space bar, since it is a space inside of the single quotes 
+  if (key == ' ') { //this means space bar, since it is a space inside of the single quotes 
     socket.emit('reset');
   }
 }
