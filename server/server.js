@@ -4,6 +4,7 @@ const app = express();
 const MAXPLAYERS = 4;
 
 let Player = require("./Player");
+let Board = require("./Board");
 
 let server = app.listen(80);
 console.log('The server is now running at http://localhost/');
@@ -13,6 +14,8 @@ let io = socket(server);
 
 let players = [];
 let playersSockets = {};
+
+let boardsize = 25;
 
 setInterval(updateGame, 60);
 
