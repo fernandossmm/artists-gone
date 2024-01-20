@@ -17,7 +17,9 @@ class Board {
         // Iterate through each grid point in the bounding box
         for (let i = Math.floor(gridX - gridRadius); i <= Math.ceil(gridX + gridRadius); i++) {
             for (let j = Math.floor(gridY - gridRadius); j <= Math.ceil(gridY + gridRadius); j++) {
-                if(dist(i+0.5, j+0.5, gridX, gridY) < gridRadius) {
+                if( i>=0 && i<this.size.x &&
+                    j>=0 && j<this.size.y &&
+                    dist(i+0.5, j+0.5, gridX, gridY) < gridRadius) {
                     this.board[i][j] = id;
                 }
             }
