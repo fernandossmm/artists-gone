@@ -24,7 +24,11 @@ setInterval(sendBoard, 100);
 io.sockets.on("connection", socket => {
   if(players.length < MAXPLAYERS)
   {
-    players.push(new Player(socket.id, 0.5, 0.5, 0.05));
+    let r = Math.floor(Math.random() * 255);
+    let g = Math.floor(Math.random() * 255);
+    let b = Math.floor(Math.random() * 255);
+    
+    players.push(new Player(socket.id, 0.5, 0.5, 0.05, {r: r, g: g, b: b}));
     playersSockets[socket.id]=socket;
     socket.emit("boardSize", boardSize);
     console.log(`New connection ${socket.id}`);
@@ -48,6 +52,8 @@ io.sockets.on("connection", socket => {
       io.sockets.emit("disconnect", socket.id);
       players = players.filter(player => player.id !== socket.id);
     });
+    
+    socket.emit("color", {r: r, g: g, b: b});
   }
   else
   {
