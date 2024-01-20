@@ -11,9 +11,10 @@ class Player {
     if(direction != null) {
       
       let length = Math.sqrt(direction.x*direction.x+direction.y*direction.y)
-
-      this.x += direction.x/length * this.speed
-      this.y += direction.y/length * this.speed
+      if(length >= this.radius/10) {
+        this.x += direction.x/length * this.speed;
+        this.y += direction.y/length * this.speed;
+      }
     }
   }
 }
