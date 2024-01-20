@@ -6,19 +6,15 @@ var socket;
 
 var playerId;
 var players = [];
+var board;
 var available = true;
 var x = 0;
 var y = 0;
 
 var currentPosition, lastPosition;
 
-const HEIGHTMENU = 50;
-
 const WIDTH = window.innerWidth;
-const HEIGHT = window.innerHeight - HEIGHTMENU;
-
-var divisionAncho = WIDTH/16;
-var divisionAlto = HEIGHT/16;
+const HEIGHT = window.innerHeight;
 
 function preload() {
   
@@ -27,7 +23,8 @@ var vol;
 var samples;
 
 function setup() {
-  createCanvas(WIDTH, HEIGHT+HEIGHTMENU);
+  createCanvas(WIDTH, HEIGHT);
+  frameRate()
   
   socket = io.connect('http://localhost'); // frajelly.raspberryip.com | localhost
   socket.on('connect', () => {
@@ -35,6 +32,8 @@ function setup() {
     $("#loader").fadeOut("slow");
   });
   socket.on("notAvailable", (x) => notAvailable());
+  
+  board = new Board({x:40, y:25});
   
   /// Client events
   socket.on("heartbeat", players => updatePlayers(players));
@@ -44,6 +43,8 @@ function setup() {
 
 function draw() {
   background(100,0,220,200);
+  
+  board.draw();
   
   for (let i = 0; i < players.length; i++) {
     players[i].draw();
@@ -55,6 +56,8 @@ function draw() {
     let direction = { x:(mouseX*1.0/WIDTH-player.x),
                       y:(mouseY*1.0/HEIGHT-player.y)}
     var move = {direction: direction};
+    
+    board.claim(player.x, player.y, player.radius, player.id);
     
     socket.emit('move', move);
   }
@@ -141,7 +144,7 @@ function updateId(id) {
 function mousePressed() {
   if(available)
   {
-    
+    console.log(board)
   }
 }
 

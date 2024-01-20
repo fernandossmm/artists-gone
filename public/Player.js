@@ -17,7 +17,9 @@ class Player {
   }
 
   draw() {
-    fill('orange')
-    circle(this.x*WIDTH, this.y*HEIGHT, this.radius*WIDTH)
+    push();
+    fill('orange');
+    circle(this.x*WIDTH, this.y*HEIGHT, this.radius*WIDTH);
+    pop();
   }
 }
