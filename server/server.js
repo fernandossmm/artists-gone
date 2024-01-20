@@ -17,6 +17,7 @@ let playersSockets = {};
 
 let boardSize = {x:40, y:25};
 let board = new Board(boardSize);
+let colormap = new Map();
 
 setInterval(updateGame, 16);
 setInterval(sendBoard, 100);
@@ -24,8 +25,14 @@ setInterval(sendBoard, 100);
 io.sockets.on("connection", socket => {
   if(players.length < MAXPLAYERS)
   {
-    players.push(new Player(socket.id, 0.5, 0.5, 0.05));
+    let r = Math.floor(Math.random() * 256);
+    let g = Math.floor(Math.random() * 256);
+    let b = Math.floor(Math.random() * 256);
+    let color = {r: r, g: g, b: b};
+    
+    players.push(new Player(socket.id, 0.5, 0.5, 0.05, color));
     playersSockets[socket.id]=socket;
+    colormap.set(socket.id, color);
     socket.emit("boardSize", boardSize);
     console.log(`New connection ${socket.id}`);
 
@@ -64,7 +71,8 @@ function updateGame() {
 }
 
 function sendBoard() {
-  io.sockets.emit("updateBoard", board.board);
+  jsonMap = JSON.stringify(Array.from(colormap));
+  io.sockets.emit("updateBoard", {board:board.board, colormap:jsonMap});
 }
 
 function getPlayer(id) {

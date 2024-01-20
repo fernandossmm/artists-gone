@@ -1,10 +1,11 @@
 class Player {
-  constructor(id, x, y, radius) {
+  constructor(id, x, y, radius, color) {
     this.id = id;
     this.x = x;
     this.y = y;
     this.radius = radius;
-    this.speed = 0.002;
+    this.color = color;
+    this.speed = 0.004;
   }
 
   move(direction) {

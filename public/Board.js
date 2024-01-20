@@ -26,15 +26,18 @@ class Board {
         }
     }
     
-    draw() {
+    draw(colormap) {
         push();
-        fill('#00FF00');
         noStroke();
         scale(WIDTH*1.0/this.size.x, HEIGHT*1.0/this.size.y);
         for(let i = 0; i < this.size.x; i++) {
             for(let j = 0; j < this.size.y; j++) {
                 if(this.board[i][j] != null) {
-                    rect(i, j, 1, 1);
+                    let color = colormap.get(this.board[i][j]);
+                    if(color != undefined) {
+                        fill(color.r, color.g, color.b);
+                        rect(i, j, 1, 1);
+                    }
                 }
             }
         }
