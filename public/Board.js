@@ -12,7 +12,7 @@ class Board {
         // X, Y and radius between 0 and 1
         let gridX = this.size.x*x
         let gridY = this.size.y*y
-        let gridRadius = min(this.size.x, this.size.y)*radius;
+        let gridRadius = Math.min(this.size.x, this.size.y)*radius;
 
         // Iterate through each grid point in the bounding box
         for (let i = Math.floor(gridX - gridRadius); i <= Math.ceil(gridX + gridRadius); i++) {
@@ -24,10 +24,6 @@ class Board {
                 }
             }
         }
-    }
-    
-    isPointInsideCircle(x, y, centerX, centerY, radius) {
-        return Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2);
     }
     
     draw() {
