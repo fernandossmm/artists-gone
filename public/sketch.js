@@ -6,7 +6,9 @@ var socket;
 
 var playerId;
 var players = [];
+
 var board;
+
 var available = true;
 var x = 0;
 var y = 0;
@@ -33,10 +35,10 @@ function setup() {
   });
   socket.on("notAvailable", (x) => notAvailable());
   
-  board = new Board({x:40, y:25});
-  
   /// Client events
   socket.on("heartbeat", players => updatePlayers(players));
+  socket.on("updateBoard", board => updateBoard(board));
+  socket.on("boardSize", size => setBoardSize(size));
   socket.on("showMessage", message => alert(message));
   socket.on("disconnect", playerId => removePlayer(playerId));
 }
@@ -44,13 +46,14 @@ function setup() {
 function draw() {
   background(100,0,220,200);
   
-  board.draw();
+  if(board != null)
+    board.draw();
   
   for (let i = 0; i < players.length; i++) {
     players[i].draw();
   }
 
-  if(getPlayer(playerId) != null) {
+  if(board != null && getPlayer(playerId) != null) {
     let player = getPlayer(playerId)
 
     let direction = { x:(mouseX*1.0/WIDTH-player.x),
@@ -91,6 +94,15 @@ Button.prototype.isMouseInside = function() {
          mouseY > this.y &&
          mouseY < (this.y + this.height);
 };
+
+////////////////////////////////////////////////////////////////// BOARD LOGIC
+function setBoardSize(size) {
+  board = new Board(size);
+}
+
+function updateBoard(newBoard) {
+  board.update(newBoard);
+}
 
 ////////////////////////////////////////////////////////////////// PLAYERS LOGIC
 
@@ -154,3 +166,8 @@ function mouseReleased() {
   }
 }
 
+function keyPressed(){
+  if (key == ' '){ //this means space bar, since it is a space inside of the single quotes 
+    socket.emit('reset');
+  }
+}
