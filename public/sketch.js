@@ -32,7 +32,7 @@ const HEIGHT = window.innerHeight;
 var playerImages = [];
 function preload() {
   playerImages.push(loadImage('assets/player1.png'));
-  playerImages.push(loadImage('assets/player1.png'));
+  playerImages.push(loadImage('assets/player2.png'));
 }
 
 function setup() {
