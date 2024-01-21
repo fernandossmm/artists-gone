@@ -25,12 +25,12 @@ let timer = 0;
 let players = [];
 let playersSockets = {};
 
-let boardSize = {x:20, y:10};
+let boardSize = {x:30, y:17};
 let board = new Board(boardSize);
 let colormap = new Map();
 
 setInterval(updateGame, 16);
-setInterval(sendBoard, 100);
+setInterval(sendBoard, 1000);
 
 io.sockets.on("connection", socket => {
   if(players.length < MAXPLAYERS && gameState == gameStates.init)

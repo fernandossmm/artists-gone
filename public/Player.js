@@ -30,7 +30,10 @@ class Player {
   draw() {
     push();
     fill(this.color.r, this.color.g, this.color.b);
-    circle(this.x*WIDTH, this.y*HEIGHT, this.radius*WIDTH);
+    //circle(this.x*WIDTH, this.y*HEIGHT, this.radius*WIDTH);
+    var radiusX = this.radius*WIDTH*1.2;
+    var radiusY = this.radius*HEIGHT*2.6;
+    image(this.image, this.x*WIDTH-radiusX/2, this.y*HEIGHT-radiusY/2, radiusX, radiusY);
     pop();
   }
 }

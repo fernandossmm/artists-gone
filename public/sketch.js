@@ -155,7 +155,7 @@ function updatePlayers(serverPlayers) {
   for (let i = 0; i < serverPlayers.length; i++) {
     let playerFromServer = serverPlayers[i];
     if (!playerExists(playerFromServer)) {
-      players.push(new Player(playerFromServer));
+      players.push(new Player(playerFromServer, playerImages[i%playerImages.length]));
     }
     else {
       let localPlayer = players[i]
