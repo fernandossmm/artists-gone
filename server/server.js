@@ -90,6 +90,10 @@ function resetGame() {
 
 function updateGame() {
   
+  if(players.length == 0 && gameState != gameStates.init) {
+    resetGame();
+  }
+  
   let numOfReadyPlayers = 0;
   for (let i = 0; i < players.length; i++) {
     if(players[i].ready)
