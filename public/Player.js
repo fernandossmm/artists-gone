@@ -1,10 +1,11 @@
 class Player {
-  constructor(player) {
+  constructor(player, img) {
     this.id = player.id;
     this.x = player.x;
     this.y = player.y;
     this.radius = player.radius;
     this.color = player.color;
+    this.image = img;
     this.speed = player.speed;
   }
   

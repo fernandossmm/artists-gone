@@ -3,6 +3,7 @@ const socket = require('socket.io');
 const app = express();
 const MINPLAYERS = 1;
 const MAXPLAYERS = 2;
+const TIMERLENGTH = 6000;
 
 let Player = require("./Player");
 let Board = require("./Board");
@@ -19,11 +20,12 @@ const gameStates = {
 	results: "results"
 }
 let gameState = gameStates.init;
+let timer = 0;
 
 let players = [];
 let playersSockets = {};
 
-let boardSize = {x:40, y:25};
+let boardSize = {x:20, y:10};
 let board = new Board(boardSize);
 let colormap = new Map();
 
@@ -60,14 +62,18 @@ io.sockets.on("connection", socket => {
       resetGame();
     });
     
+    socket.on('resetTimer', function (data) {
+      if(gameState == gameStates.game)
+        timer = 60;
+    });
+    
     socket.on("disconnect", reason => {
       console.log("Closed connection "+ socket.id);
       io.sockets.emit("disconnect", socket.id);
       players = players.filter(player => player.id !== socket.id);
     });
   }
-  else
-  {
+  else {
     socket.emit("notAvailable", socket.id);
   }
 });
@@ -86,6 +92,8 @@ function resetGame() {
     
     player.ready = false;
   }
+  
+  console.log("Game reset");
 }
 
 function updateGame() {
@@ -93,24 +101,41 @@ function updateGame() {
   if(players.length == 0 && gameState != gameStates.init) {
     resetGame();
   }
-  
-  let numOfReadyPlayers = 0;
-  for (let i = 0; i < players.length; i++) {
-    if(players[i].ready)
-      numOfReadyPlayers += 1;
-    
-    board.claim(players[i].x, players[i].y, players[i].radius, players[i].id);
+  if(gameState == gameStates.results) {
+    resetGame();
   }
   
-  if(gameState == gameStates.init &&
-    numOfReadyPlayers >= MINPLAYERS &&
-    numOfReadyPlayers >= players.length) {
-      resetGame();
-      gameState = gameStates.game;
-  }
+  // Update init state
+  if(gameState == gameStates.init) {
+    let numOfReadyPlayers = 0;
+    for (let i = 0; i < players.length; i++) {
+      if(players[i].ready)
+        numOfReadyPlayers += 1;
+    }
     
+    if(numOfReadyPlayers >= MINPLAYERS &&
+       numOfReadyPlayers >= players.length) {
+        gameState = gameStates.game;
+        timer = TIMERLENGTH;
+    }
+  }
   
-  io.sockets.emit("heartbeat", {state: gameState, players:players});
+  // Update game state
+  if(gameState == gameStates.game) {
+    for (let i = 0; i < players.length; i++) {
+      board.claim(players[i].x, players[i].y, players[i].radius, players[i].id);
+    }
+    
+    if(timer > 0)
+      timer -= 1;
+    
+    if(timer <= 0 || players.length < MINPLAYERS) {
+      gameState = gameStates.results;
+    }
+  }
+  
+  
+  io.sockets.emit("heartbeat", {state: gameState, timer:timer, players:players});
 }
 
 function sendBoard() {

@@ -4,6 +4,8 @@ p5.disableFriendlyErrors = true;
 
 var socket;
 
+var timer;
+
 var playerId;
 var players = [];
 
@@ -14,7 +16,8 @@ var available = true;
 var x = 0;
 var y = 0;
 
-var currentPosition, lastPosition;
+var readyButton;
+var finishButton;
 
 const gameStates = {
 	init: "init",
@@ -26,6 +29,12 @@ let gameState = gameStates.init;
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 
+var playerImages = [];
+function preload() {
+  playerImages.push(loadImage('assets/player1.png'));
+  playerImages.push(loadImage('assets/player1.png'));
+}
+
 function setup() {
   createCanvas(WIDTH, HEIGHT);
   frameRate()
@@ -36,6 +45,9 @@ function setup() {
     $("#loader").fadeOut("slow");
   });
   setBoardSize(1);
+  
+  readyButton = new Button(WIDTH*0.4, HEIGHT*0.6, WIDTH*0.2, HEIGHT*0.1, "Ready?");
+  finishButton = new Button(WIDTH*0.4, HEIGHT*0.6, WIDTH*0.2, HEIGHT*0.1, "Play again!");
   
   socket.on("notAvailable", (x) => notAvailable());
   
@@ -58,7 +70,7 @@ function draw() {
     updateGame();
   }
   else if(gameState == gameStates.results) {
-    
+    showResults();
   }
 }
 
@@ -66,10 +78,12 @@ function draw() {
 
 function showInit() {
   background(0,0,40);
+  
+  readyButton.draw();
 }
 
 function showGame() {
-  background(100,0,220);
+  background(120,120,120);
   
   if(board != null && colormap != null && colormap.size > 0)
     board.draw(colormap);
@@ -77,6 +91,25 @@ function showGame() {
   for (let i = 0; i < players.length; i++) {
     players[i].draw();
   }
+  
+  drawTimer();
+}
+
+function drawTimer() {
+  push();
+  textSize(HEIGHT/20);
+  textAlign(CENTER);
+  textStyle(BOLD);
+  fill(0);
+  strokeWeight(4);
+  text(Math.ceil(timer/60), 0, 0, WIDTH, HEIGHT*0.1);
+  pop();
+}
+
+function showResults() {
+  background(0,20,0);
+  
+  finishButton.draw();
 }
 
 ////////////////////////////////////////////////////////////////// LOGIC UPDATES
@@ -84,11 +117,14 @@ function showGame() {
 function heartbeat(data) {
   setState(data.state);
   
+  timer = data.timer;
+  
   updatePlayers(data.players);
 }
 
-function setState(newGameState) {
-  gameState = newGameState;
+function setState(newGameState, force) {
+  if(gameState != gameStates.results || force)
+    gameState = newGameState;
 }
 
 function updateGame() {
@@ -174,17 +210,27 @@ function updateBoard(newBoard, jsonMap) {
 
 function mousePressed() {
   if(available) {
-    console.log(gameState);
+    if (readyButton.isMouseInside() && gameState == gameStates.init) {
+      socket.emit('ready');
+      
+      readyButton.text ="Ready!";
+    }
+    if (finishButton.isMouseInside() && gameState == gameStates.results) {
+      setState(gameState.init, true);
+      
+      readyButton.text ="Ready?";
+    }
   }
 }
 
 function keyPressed(){
-  if (key == ' ') { //this means space bar, since it is a space inside of the single quotes 
-    socket.emit('reset');
-  }
-  if (key == 'r') {
-    console.log("ready")
-    socket.emit('ready');
+  if(available) {
+    if (key == ' ') { //this means space bar, since it is a space inside of the single quotes 
+      socket.emit('reset');
+    }
+    if (key == 'x') { //this means space bar, since it is a space inside of the single quotes 
+      socket.emit('resetTimer');
+    }
   }
 }
 
@@ -199,15 +245,17 @@ function Button(x,y,width,height,text){
 }
 
 Button.prototype.draw=function(){
+  push();
   fill(230,230,230, 100);
   stroke(230,230,230, 150);
   rect(this.x,this.y,this.width,this.height);
   textSize(this.width/10);
   textAlign(CENTER, CENTER);
-  fill(20,20,20,180);
+  fill(40,40,40, 220);
   stroke(0,0,0,0);
   text(this.text, this.x, this.y, this.width, this.height);
   stroke(230,230,230, 40);
+  pop();
 }
 
 Button.prototype.isMouseInside = function() {
