@@ -27,16 +27,21 @@ class Board {
     }
     
     draw(colormap) {
+        
         push();
-        noStroke();
+        var ids = colormap.keys();
+        strokeWeight(0.05);
         scale(WIDTH*1.0/this.size.x, HEIGHT*1.0/this.size.y);
-        for(let i = 0; i < this.size.x; i++) {
-            for(let j = 0; j < this.size.y; j++) {
-                if(this.board[i][j] != null) {
-                    let color = colormap.get(this.board[i][j]);
-                    if(color != undefined) {
-                        fill(color.r, color.g, color.b);
-                        rect(i, j, 1, 1);
+        
+        for(let id of ids) {
+            let color = colormap.get(id);
+            fill(color.r, color.g, color.b);
+            stroke(color.r, color.g, color.b);
+            if(color != undefined) {
+                for(let i = 0; i < this.size.x; i++) {
+                    for(let j = 0; j < this.size.y; j++) {
+                        if(this.board[i][j] == id)
+                            rect(i, j, 1, 1);
                     }
                 }
             }
