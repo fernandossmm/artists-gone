@@ -27,13 +27,15 @@ class Board {
     }
     
     draw(colormap) {
+        
         push();
         var ids = colormap.keys();
-        
+        strokeWeight(0.05);
         scale(WIDTH*1.0/this.size.x, HEIGHT*1.0/this.size.y);
         
         for(let id of ids) {
             let color = colormap.get(id);
+            fill(color.r, color.g, color.b);
             stroke(color.r, color.g, color.b);
             if(color != undefined) {
                 for(let i = 0; i < this.size.x; i++) {

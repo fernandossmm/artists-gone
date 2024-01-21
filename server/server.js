@@ -30,7 +30,7 @@ let board = new Board(boardSize);
 let colormap = new Map();
 
 setInterval(updateGame, 16);
-setInterval(sendBoard, 1000);
+setInterval(sendBoard, 100);
 
 io.sockets.on("connection", socket => {
   if(players.length < MAXPLAYERS && gameState == gameStates.init)
@@ -65,6 +65,10 @@ io.sockets.on("connection", socket => {
     socket.on('resetTimer', function (data) {
       if(gameState == gameStates.game)
         timer = 60;
+    });
+    
+    socket.on('fillBoard', function (data) {
+      board.claim(0, 0, 50, players[0].id);
     });
     
     socket.on("disconnect", reason => {

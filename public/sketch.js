@@ -72,6 +72,8 @@ function draw() {
   else if(gameState == gameStates.results) {
     showResults();
   }
+  
+  drawFPS();
 }
 
 ////////////////////////////////////////////////////////////////// VISUALS
@@ -103,6 +105,16 @@ function drawTimer() {
   fill(0);
   strokeWeight(4);
   text(Math.ceil(timer/60), 0, 0, WIDTH, HEIGHT*0.1);
+  pop();
+}
+
+function drawFPS() {
+  push();
+  textSize(HEIGHT/20);
+  textAlign(CENTER);
+  fill(50);
+  strokeWeight(4);
+  text(int(frameRate()), WIDTH*0.8, 0, WIDTH*0.2, HEIGHT*0.1);
   pop();
 }
 
@@ -230,6 +242,9 @@ function keyPressed(){
     }
     if (key == 'x') { //this means space bar, since it is a space inside of the single quotes 
       socket.emit('resetTimer');
+    }
+    if (key == 'f') { //this means space bar, since it is a space inside of the single quotes 
+      socket.emit('fillBoard');
     }
   }
 }
