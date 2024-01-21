@@ -1,6 +1,7 @@
 const express = require("express");
 const socket = require('socket.io');
 const app = express();
+const MINPLAYERS = 1;
 const MAXPLAYERS = 2;
 
 let Player = require("./Player");
@@ -11,6 +12,13 @@ console.log('The server is now running at http://localhost/');
 app.use(express.static("public"));
 
 let io = socket(server);
+
+const gameStates = {
+	init: "init",
+	game: "game",
+	results: "results"
+}
+let gameState = gameStates.init;
 
 let players = [];
 let playersSockets = {};
@@ -23,7 +31,7 @@ setInterval(updateGame, 16);
 setInterval(sendBoard, 100);
 
 io.sockets.on("connection", socket => {
-  if(players.length < MAXPLAYERS)
+  if(players.length < MAXPLAYERS && gameState == gameStates.init)
   {
     let r = Math.floor(Math.random() * 256);
     let g = Math.floor(Math.random() * 256);
@@ -42,12 +50,14 @@ io.sockets.on("connection", socket => {
       player.move(data.direction);
     });
     
-    socket.on('released', function (data) {
-      
+    socket.on('ready', function (data) {
+      let player = getPlayer(socket.id);
+
+      player.ready = true;
     });
     
     socket.on('reset', function (data) {
-      board = new Board(boardSize);
+      resetGame();
     });
     
     socket.on("disconnect", reason => {
@@ -62,12 +72,41 @@ io.sockets.on("connection", socket => {
   }
 });
 
-function updateGame() {
+function resetGame() {
+  gameState = gameStates.init;
+  
+  board = new Board(boardSize);
+  
   for (let i = 0; i < players.length; i++) {
+    let player = players[i];
+    
+    player.y = 0.5;
+    player.x = (0.1+i*0.8)%1;
+    player.radius = player.initialRadius;
+    
+    player.ready = false;
+  }
+}
+
+function updateGame() {
+  
+  let numOfReadyPlayers = 0;
+  for (let i = 0; i < players.length; i++) {
+    if(players[i].ready)
+      numOfReadyPlayers += 1;
+    
     board.claim(players[i].x, players[i].y, players[i].radius, players[i].id);
   }
   
-  io.sockets.emit("heartbeat", players);
+  if(gameState == gameStates.init &&
+    numOfReadyPlayers >= MINPLAYERS &&
+    numOfReadyPlayers >= players.length) {
+      resetGame();
+      gameState = gameStates.game;
+  }
+    
+  
+  io.sockets.emit("heartbeat", {state: gameState, players:players});
 }
 
 function sendBoard() {

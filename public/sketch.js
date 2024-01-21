@@ -16,6 +16,13 @@ var y = 0;
 
 var currentPosition, lastPosition;
 
+const gameStates = {
+	init: "init",
+	game: "game",
+	results: "results"
+}
+let gameState = gameStates.init;
+
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 
@@ -23,15 +30,17 @@ function setup() {
   createCanvas(WIDTH, HEIGHT);
   frameRate()
   
-  socket = io.connect('http://192.168.0.11'); // frajelly.raspberryip.com | localhost
+  socket = io.connect('http://localhost'); // frajelly.raspberryip.com | localhost
   socket.on('connect', () => {
     playerId = socket.id; // an alphanumeric id
     $("#loader").fadeOut("slow");
   });
+  setBoardSize(1);
+  
   socket.on("notAvailable", (x) => notAvailable());
   
   /// Client events
-  socket.on("heartbeat", players => updatePlayers(players));
+  socket.on("heartbeat", data => heartbeat(data));
   socket.on("updateBoard", data => updateBoard(data.board, data.colormap));
   socket.on("color", color => setColor(color));
   socket.on("boardSize", size => setBoardSize(size));
@@ -40,7 +49,27 @@ function setup() {
 }
 
 function draw() {
-  background(100,0,220,200);
+  if(gameState == gameStates.init) {
+    showInit();
+  }
+  else if(gameState == gameStates.game) {
+    showGame();
+    
+    updateGame();
+  }
+  else if(gameState == gameStates.results) {
+    
+  }
+}
+
+////////////////////////////////////////////////////////////////// VISUALS
+
+function showInit() {
+  background(0,0,40);
+}
+
+function showGame() {
+  background(100,0,220);
   
   if(board != null && colormap != null && colormap.size > 0)
     board.draw(colormap);
@@ -48,57 +77,40 @@ function draw() {
   for (let i = 0; i < players.length; i++) {
     players[i].draw();
   }
+}
 
-  if(board != null && getPlayer(playerId) != null) {
-    let player = getPlayer(playerId)
+////////////////////////////////////////////////////////////////// LOGIC UPDATES
 
+function heartbeat(data) {
+  setState(data.state);
+  
+  updatePlayers(data.players);
+}
+
+function setState(newGameState) {
+  gameState = newGameState;
+}
+
+function updateGame() {
+  processMove();
+}
+
+function processMove() {
+  let player = getPlayer(playerId);
+  
+  if(board != null && player != null) {
     let direction = {x:(mouseX*1.0/WIDTH-player.x),
-                     y:(mouseY*1.0/HEIGHT-player.y)}
+                     y:(mouseY*1.0/HEIGHT-player.y)};
     var move = {direction: direction};
     
-    board.claim(player.x, player.y, player.radius, player.id);
+    // This updates the player position before it comes back from the server, sort of a prediction
+    player.move(direction);
     
     socket.emit('move', move);
+    
+    // This shows claimed spots for the player before they come back from the server
+    board.claim(player.x, player.y, player.radius, player.id);
   }
-}
-
-////////////////////////////////////////////////////////////////// BUTTONS
-
-function Button(x,y,width,height,text){
-  this.x=x;
-  this.y=y;
-  this.width=width;
-  this.height=height;
-  this.text=text;
-}
-
-Button.prototype.draw=function(){
-  fill(230,230,230, 100);
-  stroke(230,230,230, 150);
-  rect(this.x,this.y,this.width,this.height);
-  textSize(this.width/10);
-  textAlign(CENTER, CENTER);
-  fill(20,20,20,180);
-  stroke(0,0,0,0);
-  text(this.text, this.x, this.y, this.width, this.height);
-  stroke(230,230,230, 40);
-}
-
-Button.prototype.isMouseInside = function() {
-  return mouseX > this.x &&
-         mouseX < (this.x + this.width) &&
-         mouseY > this.y &&
-         mouseY < (this.y + this.height);
-};
-
-////////////////////////////////////////////////////////////////// BOARD LOGIC
-function setBoardSize(size) {
-  board = new Board(size);
-}
-
-function updateBoard(newBoard, jsonMap) {
-  board.update(newBoard);
-  colormap = new Map(JSON.parse(jsonMap));
 }
 
 ////////////////////////////////////////////////////////////////// PLAYERS LOGIC
@@ -148,17 +160,21 @@ function updateId(id) {
   playerId = id;
 }
 
+////////////////////////////////////////////////////////////////// BOARD LOGIC
+function setBoardSize(size) {
+  board = new Board(size);
+}
+
+function updateBoard(newBoard, jsonMap) {
+  board.update(newBoard);
+  colormap = new Map(JSON.parse(jsonMap));
+}
+
 ////////////////////////////////////////////////////////////////// MOUSE EVENTS
 
 function mousePressed() {
   if(available) {
-    console.log(colormap, board.board);
-  }
-}
-
-function mouseReleased() {
-  if(available) {
-    
+    console.log(gameState);
   }
 }
 
@@ -166,4 +182,37 @@ function keyPressed(){
   if (key == ' ') { //this means space bar, since it is a space inside of the single quotes 
     socket.emit('reset');
   }
+  if (key == 'r') {
+    console.log("ready")
+    socket.emit('ready');
+  }
 }
+
+////////////////////////////////////////////////////////////////// BUTTONS
+
+function Button(x,y,width,height,text){
+  this.x=x;
+  this.y=y;
+  this.width=width;
+  this.height=height;
+  this.text=text;
+}
+
+Button.prototype.draw=function(){
+  fill(230,230,230, 100);
+  stroke(230,230,230, 150);
+  rect(this.x,this.y,this.width,this.height);
+  textSize(this.width/10);
+  textAlign(CENTER, CENTER);
+  fill(20,20,20,180);
+  stroke(0,0,0,0);
+  text(this.text, this.x, this.y, this.width, this.height);
+  stroke(230,230,230, 40);
+}
+
+Button.prototype.isMouseInside = function() {
+  return mouseX > this.x &&
+         mouseX < (this.x + this.width) &&
+         mouseY > this.y &&
+         mouseY < (this.y + this.height);
+};

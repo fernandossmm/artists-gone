@@ -7,6 +7,16 @@ class Player {
     this.color = player.color;
     this.speed = player.speed;
   }
+  
+  move(direction) {
+    if(direction != null) {
+      let length = Math.sqrt(direction.x*direction.x+direction.y*direction.y)
+      if(length >= this.radius/10) {
+        this.x += direction.x/length * this.speed;
+        this.y += direction.y/length * this.speed;
+      }
+    }
+  }
 
   update(player) {
     this.instrument = player.instrument;

@@ -6,6 +6,9 @@ class Player {
     this.radius = radius;
     this.color = color;
     this.speed = 0.004;
+    this.initialRadius = 0.05;
+    
+    this.ready = false;
   }
 
   move(direction) {
