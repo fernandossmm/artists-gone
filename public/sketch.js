@@ -26,17 +26,17 @@ const gameStates = {
 	game: "game",
 	results: "results"
 }
-let gameState = gameStates.init;
+var gameState = gameStates.init;
 
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 
-var playerImages = [];
+var splats = [];
 var backgroundImages = new Map();
 
 function preload() {
-  playerImages.push(loadImage('assets/player1.png'));
-  playerImages.push(loadImage('assets/player2.png'));
+  splats.push(loadImage('assets/player1.png'));
+  splats.push(loadImage('assets/player2.png'));
   backgroundImages.set("wood", loadImage('assets/background.jpg'));
 }
 
@@ -206,11 +206,11 @@ function updatePlayers(serverPlayers) {
   for (let i = 0; i < serverPlayers.length; i++) {
     let playerFromServer = serverPlayers[i];
     if (!playerExists(playerFromServer)) {
-      players.push(new Player(playerFromServer, playerImages[i%playerImages.length]));
+      players.push(new Player(playerFromServer, splats));
     }
     else {
       let localPlayer = players[i]
-      localPlayer.update(playerFromServer)
+      localPlayer.update(playerFromServer, splats)
     }
   }
 }

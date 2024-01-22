@@ -1,12 +1,13 @@
 class Player {
-  constructor(player, img) {
+  constructor(player, splats) {
     this.id = player.id;
+    this.number = player.number;
     this.name = player.name;
     this.x = player.x;
     this.y = player.y;
     this.radius = player.radius;
     this.color = player.color;
-    this.image = img;
+    this.image = splats[player.number%splats.length];
     this.speed = player.speed;
   }
   
@@ -20,12 +21,14 @@ class Player {
     }
   }
 
-  update(player) {
-    this.instrument = player.instrument;
+  update(player, splats) {
+    this.number = player.number;
+    this.name = player.name;
     this.x = player.x;
     this.y = player.y;
     this.radius = player.radius;
     this.speed = player.speed;
+    this.image = splats[player.number%splats.length];
   }
 
   draw() {
