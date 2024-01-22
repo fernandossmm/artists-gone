@@ -1,6 +1,7 @@
 class Player {
   constructor(player, img) {
     this.id = player.id;
+    this.name = player.name;
     this.x = player.x;
     this.y = player.y;
     this.radius = player.radius;

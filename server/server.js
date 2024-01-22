@@ -21,11 +21,12 @@ const gameStates = {
 }
 let gameState = gameStates.init;
 let timer = 0;
+let results;
 
 let players = [];
 let playersSockets = {};
 
-let boardSize = {x:30, y:17};
+let boardSize = {x:60, y:34};
 let board = new Board(boardSize);
 let colormap = new Map();
 
@@ -135,16 +136,21 @@ function updateGame() {
     
     if(timer <= 0 || players.length < MINPLAYERS) {
       gameState = gameStates.results;
+      sendScores();
     }
   }
   
-  
-  io.sockets.emit("heartbeat", {state: gameState, timer:timer, players:players});
+  io.sockets.emit("heartbeat", {state:gameState, timer:timer, players:players});
 }
 
 function sendBoard() {
   jsonMap = JSON.stringify(Array.from(colormap));
   io.sockets.emit("updateBoard", {board:board.board, colormap:jsonMap});
+}
+
+function sendScores() {
+  scores = JSON.stringify(Array.from(board.calculateScores()));
+  io.sockets.emit("updateScores", scores);
 }
 
 function getPlayer(id) {

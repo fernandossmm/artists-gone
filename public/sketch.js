@@ -11,6 +11,8 @@ var players = [];
 
 var board;
 var colormap;
+var results;
+var resultsBoard;
 
 var available = true;
 var x = 0;
@@ -30,9 +32,12 @@ const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 
 var playerImages = [];
+var backgroundImages = new Map();
+
 function preload() {
   playerImages.push(loadImage('assets/player1.png'));
   playerImages.push(loadImage('assets/player2.png'));
+  backgroundImages.set("wood", loadImage('assets/background.jpg'));
 }
 
 function setup() {
@@ -53,7 +58,8 @@ function setup() {
   
   /// Client events
   socket.on("heartbeat", data => heartbeat(data));
-  socket.on("updateBoard", data => updateBoard(data.board, data.colormap));
+  socket.on("updateBoard", data => updateBoard(data));
+  socket.on("updateScores", scores => updateScores(scores));
   socket.on("color", color => setColor(color));
   socket.on("boardSize", size => setBoardSize(size));
   socket.on("showMessage", message => alert(message));
@@ -72,8 +78,6 @@ function draw() {
   else if(gameState == gameStates.results) {
     showResults();
   }
-  
-  drawFPS();
 }
 
 ////////////////////////////////////////////////////////////////// VISUALS
@@ -81,14 +85,15 @@ function draw() {
 function showInit() {
   background(0,0,40);
   
+  image(backgroundImages.get("wood"), 0,0, WIDTH, HEIGHT);
+  
   readyButton.draw();
 }
 
 function showGame() {
   background(120,120,120);
   
-  if(board != null && colormap != null && colormap.size > 0)
-    board.draw(colormap);
+  drawBoard(board);
   
   for (let i = 0; i < players.length; i++) {
     players[i].draw();
@@ -118,8 +123,42 @@ function drawFPS() {
   pop();
 }
 
+function drawBoard(board) {
+  if(board != null && colormap != null && colormap.size > 0)
+    board.draw(colormap);
+}
+
 function showResults() {
-  background(0,20,0);
+  background(120,120,120);
+  
+  if(resultsBoard != undefined)
+    drawBoard(resultsBoard);
+  
+  push();
+  fill(0, 0, 0, 100);
+  rect(WIDTH*0.3, HEIGHT*0.2, WIDTH*0.4, HEIGHT*0.6);
+  textSize(HEIGHT/40);
+  textAlign(CENTER);
+  fill(255);
+  strokeWeight(4);
+  
+  // Title
+  text("And the winner is...", WIDTH*0.35, HEIGHT*0.3, WIDTH*0.3, HEIGHT*0.1);
+  
+  var sorted = Array.from(results).sort((a, b) => b[1] - a[1]);
+  // Winner
+  textSize(HEIGHT/20);
+  text(getPlayer(sorted[0][0]).name+": "+Math.round(sorted[0][1]*100)+"%",
+                  WIDTH*0.35, HEIGHT*0.4, WIDTH*0.3, HEIGHT*0.1);
+  
+  // Other(s)
+  textSize(HEIGHT/40);
+  for(var i=1; i < sorted.length; i++) {
+    if(sorted[i][1] != undefined)
+      text(getPlayer(sorted[i][0]).name+": "+Math.round(sorted[i][1]*100)+"%",
+            WIDTH*0.35, HEIGHT*0.45+i*HEIGHT*0.05, WIDTH*0.3, HEIGHT*0.1);
+  }
+  pop();
   
   finishButton.draw();
 }
@@ -213,9 +252,15 @@ function setBoardSize(size) {
   board = new Board(size);
 }
 
-function updateBoard(newBoard, jsonMap) {
-  board.update(newBoard);
-  colormap = new Map(JSON.parse(jsonMap));
+function updateBoard(data) {
+  board.update(data.board);
+  colormap = new Map(JSON.parse(data.colormap));
+}
+
+function updateScores(scores) {
+  results = new Map(JSON.parse(scores));
+  resultsBoard = new Board(board.size);
+  resultsBoard.update(board.board);
 }
 
 ////////////////////////////////////////////////////////////////// MOUSE EVENTS

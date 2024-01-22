@@ -27,7 +27,6 @@ class Board {
     }
     
     draw(colormap) {
-        
         push();
         var ids = colormap.keys();
         strokeWeight(0.05);
