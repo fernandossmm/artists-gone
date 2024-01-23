@@ -9,7 +9,7 @@ class Player {
     this.y = y;
     this.radius = radius;
     this.color = color;
-    this.speed = 0.005;
+    this.speed = 0.007;
     this.initialRadius = 0.05;
     this.powerUps = [];
     
@@ -44,10 +44,9 @@ class Player {
         this.removePowerUp(powerUp);
       }
     }
-  }
-
-  move(direction) {
-    if(direction != null) {
+    
+    let direction = this.direction;
+    if(direction != undefined) {
       let length = Math.sqrt(direction.x*direction.x+direction.y*direction.y);
       if(length >= this.radius/10) {
         this.x += direction.x/length * this.speed;
@@ -55,6 +54,12 @@ class Player {
         this.x = Math.min(Math.max(this.radius*0.9, this.x), 1-this.radius*0.9);
         this.y = Math.min(Math.max(this.radius*0.9, this.y), 1-this.radius*0.9);
       }
+    }
+  }
+
+  move(direction) {
+    if(direction != null) {
+      this.direction = direction;
     }
   }
 }

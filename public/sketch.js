@@ -67,6 +67,7 @@ function setup() {
   
   /// Client events
   socket.on("heartbeat", data => heartbeat(data));
+  socket.on("updatePlayers", data => updatePlayers(data.players));
   socket.on("updateBoard", data => updateBoard(data));
   socket.on("updateScores", scores => updateScores(scores));
   socket.on("color", color => setColor(color));
@@ -99,12 +100,12 @@ function showInit() {
   image(top, 0, 0, WIDTH, WIDTH/top.width*top.height);
   
   let title = assets.get("title")
-  let titleScaling = 1.0;
+  let titleScaling = 1.05;
   let titleW = HEIGHT*0.4/title.height*title.width*titleScaling
-  image(title, WIDTH/2-titleW/2, HEIGHT*0.24, titleW, HEIGHT*0.4*titleScaling);
+  image(title, WIDTH/2-titleW/2, HEIGHT*0.23, titleW, HEIGHT*0.4*titleScaling);
   
   let bot = assets.get("art-bottom");
-  let botScaling = 0.8;
+  let botScaling = 0.7;
   let botH = WIDTH/bot.width*bot.height*botScaling
   image(bot, 0, HEIGHT-botH, WIDTH*botScaling, botH);
   
@@ -201,8 +202,6 @@ function heartbeat(data) {
   setState(data.state);
   
   timer = data.timer;
-  
-  updatePlayers(data.players);
 }
 
 function setState(newGameState, force) {
@@ -244,7 +243,7 @@ function updatePlayers(serverPlayers) {
     }
     else {
       let localPlayer = players[i]
-      localPlayer.update(playerFromServer, splats)
+      localPlayer.updateStats(playerFromServer, splats)
     }
   }
 }

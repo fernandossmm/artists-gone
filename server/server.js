@@ -34,7 +34,8 @@ let board = new Board(boardSize);
 let colormap = new Map();
 
 setInterval(updateGame, 16);
-setInterval(sendBoard, 100);
+setInterval(sendBoard, 300);
+setInterval(updatePlayers, 50);
 
 io.sockets.on("connection", socket => {
   if(players.length < MAXPLAYERS && gameState == gameStates.init) {
@@ -152,7 +153,11 @@ function updateGame() {
     }
   }
   
-  io.sockets.emit("heartbeat", {state:gameState, timer:timer, players:players});
+  io.sockets.emit("heartbeat", {state:gameState, timer:timer});
+}
+
+function updatePlayers() {
+  io.sockets.emit("updatePlayers", {players: players});
 }
 
 function sendBoard() {
