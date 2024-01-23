@@ -1,7 +1,11 @@
 class Board {
-    constructor(size) {
+    constructor(size, x, y, width, height) {
         this.size = size;
         this.board = Array(size.x).fill().map(()=>Array(size.y).fill());
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
     }
     
     update(board) {
@@ -30,7 +34,8 @@ class Board {
         push();
         var ids = colormap.keys();
         strokeWeight(0.05);
-        scale(WIDTH*1.0/this.size.x, HEIGHT*1.0/this.size.y);
+        translate(this.x, this.y);
+        scale(this.width*1.0/this.size.x, this.height*1.0/this.size.y);
         
         for(let id of ids) {
             let color = colormap.get(id);

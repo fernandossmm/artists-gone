@@ -32,12 +32,17 @@ const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 
 var splats = [];
-var backgroundImages = new Map();
+var assets = new Map();
 
 function preload() {
   splats.push(loadImage('assets/player1.png'));
   splats.push(loadImage('assets/player2.png'));
-  backgroundImages.set("wood", loadImage('assets/background.jpg'));
+  assets.set("wood", loadImage('assets/background.jpg'));
+  assets.set("canvas", loadImage('assets/canvas.jpg'));
+  assets.set("frame", loadImage('assets/frame.png'));
+  assets.set("button", loadImage('assets/button.png'));
+  assets.set("art-top", loadImage('assets/background-top.png'));
+  assets.set("art-bottom", loadImage('assets/background-bot.png'));
 }
 
 function setup() {
@@ -51,8 +56,8 @@ function setup() {
   });
   setBoardSize(1);
   
-  readyButton = new Button(WIDTH*0.4, HEIGHT*0.6, WIDTH*0.2, HEIGHT*0.1, "Ready?");
-  finishButton = new Button(WIDTH*0.4, HEIGHT*0.6, WIDTH*0.2, HEIGHT*0.1, "Play again!");
+  readyButton = new Button(WIDTH*0.425, HEIGHT*0.62, WIDTH*0.15, HEIGHT*0.15, "Ready?");
+  finishButton = new Button(WIDTH*0.425, HEIGHT*0.62, WIDTH*0.15, HEIGHT*0.15, "Play again!");
   
   socket.on("notAvailable", (x) => notAvailable());
   
@@ -67,6 +72,9 @@ function setup() {
 }
 
 function draw() {
+  background(120,120,120);
+  image(assets.get("wood"), 0,0, WIDTH, HEIGHT);
+  
   if(gameState == gameStates.init) {
     showInit();
   }
@@ -78,45 +86,64 @@ function draw() {
   else if(gameState == gameStates.results) {
     showResults();
   }
+  
+  drawFPS();
 }
 
 ////////////////////////////////////////////////////////////////// VISUALS
 
 function showInit() {
-  background(0,0,40);
+  let top = assets.get("art-top");
+  image(top, 0, 0, WIDTH, WIDTH/top.width*top.height);
   
-  image(backgroundImages.get("wood"), 0,0, WIDTH, HEIGHT);
+  let bot = assets.get("art-bottom");
+  let scaling = 0.8;
+  let botH = WIDTH/bot.width*bot.height*scaling
+  image(bot, 0, HEIGHT-botH, WIDTH*scaling, botH);
   
   readyButton.draw();
 }
 
 function showGame() {
-  background(120,120,120);
   
   drawBoard(board);
   
   for (let i = 0; i < players.length; i++) {
-    players[i].draw();
+    players[i].draw(board);
   }
   
+  image(assets.get("frame"), board.x-board.width*0.136, board.y-board.height*0.12, board.width*1.262, board.height*1.25);
+  
   drawTimer();
+}
+
+function showResults() {
+  if(resultsBoard != undefined) {
+    drawBoard(resultsBoard);
+  
+    image(assets.get("frame"), board.x-board.width*0.136, board.y-board.height*0.12, board.width*1.262, board.height*1.25);
+    
+    drawTimer();
+  }
+  
+  drawResultsTable()
 }
 
 function drawTimer() {
   push();
   textSize(HEIGHT/20);
-  textAlign(CENTER);
+  textAlign(CENTER, CENTER);
   textStyle(BOLD);
   fill(0);
   strokeWeight(4);
-  text(Math.ceil(timer/60), 0, 0, WIDTH, HEIGHT*0.1);
+  text(Math.ceil(timer/60), board.x, HEIGHT*0.012, board.width, HEIGHT*0.1);
   pop();
 }
 
 function drawFPS() {
   push();
   textSize(HEIGHT/20);
-  textAlign(CENTER);
+  textAlign(CENTER, CENTER);
   fill(50);
   strokeWeight(4);
   text(int(frameRate()), WIDTH*0.8, 0, WIDTH*0.2, HEIGHT*0.1);
@@ -124,18 +151,16 @@ function drawFPS() {
 }
 
 function drawBoard(board) {
+  image(assets.get("canvas"), board.x, board.y, board.width, board.height);
+  
   if(board != null && colormap != null && colormap.size > 0)
     board.draw(colormap);
 }
 
-function showResults() {
-  background(120,120,120);
-  
-  if(resultsBoard != undefined)
-    drawBoard(resultsBoard);
-  
+function drawResultsTable() {
   push();
-  fill(0, 0, 0, 100);
+  fill(0, 0, 0, 200);
+  strokeWeight(WIDTH*0.005);
   rect(WIDTH*0.3, HEIGHT*0.2, WIDTH*0.4, HEIGHT*0.6);
   textSize(HEIGHT/40);
   textAlign(CENTER);
@@ -154,7 +179,7 @@ function showResults() {
   // Other(s)
   textSize(HEIGHT/40);
   for(var i=1; i < sorted.length; i++) {
-    if(sorted[i][1] != undefined)
+    if(sorted[i][1] != undefined && getPlayer(sorted[i][0]) != undefined)
       text(getPlayer(sorted[i][0]).name+": "+Math.round(sorted[i][1]*100)+"%",
             WIDTH*0.35, HEIGHT*0.45+i*HEIGHT*0.05, WIDTH*0.3, HEIGHT*0.1);
   }
@@ -186,8 +211,10 @@ function processMove() {
   let player = getPlayer(playerId);
   
   if(board != null && player != null) {
-    let direction = {x:(mouseX*1.0/WIDTH-player.x),
-                     y:(mouseY*1.0/HEIGHT-player.y)};
+    
+    let direction = {x:((mouseX-board.x)/board.width-player.x),
+                     y:((mouseY-board.y)/board.height-player.y)};
+    
     var move = {direction: direction};
     
     // This updates the player position before it comes back from the server, sort of a prediction
@@ -249,7 +276,8 @@ function updateId(id) {
 
 ////////////////////////////////////////////////////////////////// BOARD LOGIC
 function setBoardSize(size) {
-  board = new Board(size);
+  let height = HEIGHT*0.8;
+  board = new Board(size, WIDTH/2-height/2, HEIGHT/2-height/2, height, height);
 }
 
 function updateBoard(data) {
@@ -259,7 +287,7 @@ function updateBoard(data) {
 
 function updateScores(scores) {
   results = new Map(JSON.parse(scores));
-  resultsBoard = new Board(board.size);
+  resultsBoard = new Board(board.size, board.x, board.y, board.width, board.height);
   resultsBoard.update(board.board);
 }
 
@@ -306,14 +334,16 @@ function Button(x,y,width,height,text){
 
 Button.prototype.draw=function(){
   push();
-  fill(230,230,230, 100);
+  fill(230,230,230, 200);
   stroke(230,230,230, 150);
-  rect(this.x,this.y,this.width,this.height);
-  textSize(this.width/10);
+  //rect(this.x,this.y,this.width,this.height);
+  image(assets.get("button"), this.x-this.width*0.05,this.y-this.height*0.05,this.width*1.1,this.height*1.2);
+  textSize(this.height*0.3);
   textAlign(CENTER, CENTER);
-  fill(40,40,40, 220);
-  stroke(0,0,0,0);
-  text(this.text, this.x, this.y, this.width, this.height);
+  fill(255);
+  noStroke();
+  textStyle(BOLD);
+  text(this.text, this.x+this.width*0.02, this.y-this.height*0.04, this.width, this.height);
   stroke(230,230,230, 40);
   pop();
 }
