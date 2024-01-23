@@ -19,13 +19,17 @@ const gameStates = {
 	game: "game",
 	results: "results"
 }
+const splatNames = ["Pinky", "Greg"];
+const splatColors = [{r: 254, g: 135, b: 209}, {r: 166, g: 198, b: 82}];
+
 let gameState = gameStates.init;
 let timer = 0;
+let results;
 
 let players = [];
 let playersSockets = {};
 
-let boardSize = {x:30, y:17};
+let boardSize = {x:60, y:34};
 let board = new Board(boardSize);
 let colormap = new Map();
 
@@ -33,16 +37,14 @@ setInterval(updateGame, 16);
 setInterval(sendBoard, 100);
 
 io.sockets.on("connection", socket => {
-  if(players.length < MAXPLAYERS && gameState == gameStates.init)
-  {
-    let r = Math.floor(Math.random() * 256);
-    let g = Math.floor(Math.random() * 256);
-    let b = Math.floor(Math.random() * 256);
-    let color = {r: r, g: g, b: b};
+  if(players.length < MAXPLAYERS && gameState == gameStates.init) {
+    let playerNumber = players.length%splatNames.length;
     
-    players.push(new Player(socket.id, 0.5, 0.5, 0.05, color));
+    players.push(new Player(socket.id, playerNumber, splatNames[playerNumber],
+                            0.5, 0.5, 0.05, splatColors[playerNumber]));
+    
     playersSockets[socket.id]=socket;
-    colormap.set(socket.id, color);
+    colormap.set(socket.id, splatColors[playerNumber]);
     socket.emit("boardSize", boardSize);
     console.log(`New connection ${socket.id}`);
 
@@ -113,8 +115,11 @@ function updateGame() {
   if(gameState == gameStates.init) {
     let numOfReadyPlayers = 0;
     for (let i = 0; i < players.length; i++) {
-      if(players[i].ready)
+      if(players[i].ready) {
+        players[i].number = numOfReadyPlayers;
         numOfReadyPlayers += 1;
+      }
+        
     }
     
     if(numOfReadyPlayers >= MINPLAYERS &&
@@ -135,16 +140,21 @@ function updateGame() {
     
     if(timer <= 0 || players.length < MINPLAYERS) {
       gameState = gameStates.results;
+      sendScores();
     }
   }
   
-  
-  io.sockets.emit("heartbeat", {state: gameState, timer:timer, players:players});
+  io.sockets.emit("heartbeat", {state:gameState, timer:timer, players:players});
 }
 
 function sendBoard() {
   jsonMap = JSON.stringify(Array.from(colormap));
   io.sockets.emit("updateBoard", {board:board.board, colormap:jsonMap});
+}
+
+function sendScores() {
+  scores = JSON.stringify(Array.from(board.calculateScores()));
+  io.sockets.emit("updateScores", scores);
 }
 
 function getPlayer(id) {

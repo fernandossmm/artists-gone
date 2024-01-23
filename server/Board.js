@@ -22,6 +22,30 @@ class Board {
         }
     }
     
+    calculateScores() {
+        let scores = new Map();
+        
+        for(let i = 0; i < this.size.x; i++) {
+            for(let j = 0; j < this.size.y; j++) {
+                let id = this.board[i][j];
+                if(id != null) {
+                    if(scores.has(id)) {
+                        scores.set(id, scores.get(id)+1);
+                    }
+                    else {
+                        scores.set(id, 1);
+                    }
+                }
+            }
+        }
+        
+        for(let id of scores.keys()) {
+            scores.set(id, scores.get(id)*1.0 / (this.size.x*this.size.y));
+        }
+        
+        return scores;
+    }
+    
     isPointInsideCircle(x, y, centerX, centerY, radius) {
         return Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2) <= Math.pow(radius, 2);
     }
