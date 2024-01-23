@@ -22,6 +22,11 @@ const gameStates = {
 const splatNames = ["Pinky", "Greg"];
 const splatColors = [{r: 254, g: 135, b: 209}, {r: 166, g: 198, b: 82}];
 
+const powerUpTypes = {
+	speedUp: "speedUp",
+	sizeUp: "sizeUp"
+}
+
 let gameState = gameStates.init;
 let timer = 0;
 let results;
@@ -29,7 +34,7 @@ let results;
 let players = [];
 let playersSockets = {};
 
-let boardSize = {x:60, y:34};
+let boardSize = {x:50, y:50};
 let board = new Board(boardSize);
 let colormap = new Map();
 
