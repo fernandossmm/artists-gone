@@ -1,7 +1,7 @@
 {
   "name": "techfest2024",
   "version": "1.0.0",
-  "description": "fun game this",
+  "description": "Fun game",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",

@@ -1,3 +1,5 @@
+let PowerUp = require("./PowerUp");
+
 class Player {
   constructor(id, number, name, x, y, radius, color) {
     this.id = id;
@@ -15,26 +17,30 @@ class Player {
   }
   
   applyPowerup(powerUp) {
-    switch(powerUp.type) {
-      case powerUpTypes.speedUp:
-        this.speed *= 1.2;
-        break;
+    if(powerUp.type == PowerUp.powerUpTypes.speedUp) {
+      this.speed *= powerUp.factor;
+    }
+    else if(powerUp.type == PowerUp.powerUpTypes.sizeUp) {
+      this.radius *= powerUp.factor;
     }
     this.powerUps.push(powerUp);
   }
   
   removePowerUp(powerUp) {
-    switch(powerUp.type) {
-      case powerUpTypes.speedUp:
-        this.speed /= 1.2;
-        break;
+    if(powerUp.type == PowerUp.powerUpTypes.speedUp) {
+      this.speed /= powerUp.factor;
+    }
+    else if(powerUp.type == PowerUp.powerUpTypes.sizeUp) {
+      this.radius *= powerUp.factor;
     }
     this.powerUps = this.powerUps.filter(item => item !== powerUp);
   }
   
   update() {
-    for(let powerUp in powerUps) {
+    for(let powerUp of this.powerUps) {
       powerUp.update();
+      if(powerUp.remove)
+        this.removePowerUp(powerUp);
     }
   }
 
@@ -51,19 +57,4 @@ class Player {
   }
 }
 
-class PowerUp {
-  constructor(type, duration) {
-    this.type = type;
-    this.duration = duration;
-    this.remove = false;
-  }
-  
-  update() {
-    this.duration -= 1;
-    
-    if(this.duration <= 0)
-      this.remove = true;
-  }
-}
-
-module.exports = Player, PowerUp;
+module.exports = Player;
