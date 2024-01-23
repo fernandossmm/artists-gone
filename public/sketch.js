@@ -46,13 +46,14 @@ function preload() {
   assets.set("art-bottom", loadImage('assets/background-bot.png'));
   assets.set("sizeUp", loadImage('assets/powerups/sizeUp.png'));
   assets.set("speedUp", loadImage('assets/powerups/speedUp.png'));
+  assets.set("bomb", loadImage('assets/powerups/bomb.png'));
 }
 
 function setup() {
   createCanvas(WIDTH, HEIGHT);
   frameRate()
   
-  socket = io.connect('http://localhost'); // frajelly.raspberryip.com | localhost
+  socket = io.connect('192.168.0.45'); // frajelly.raspberryip.com | localhost
   socket.on('connect', () => {
     playerId = socket.id; // an alphanumeric id
     $("#loader").fadeOut("slow");
@@ -89,8 +90,6 @@ function draw() {
   else if(gameState == gameStates.results) {
     showResults();
   }
-  
-  drawFPS();
 }
 
 ////////////////////////////////////////////////////////////////// VISUALS

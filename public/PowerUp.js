@@ -2,7 +2,8 @@ class PowerUp {
     
     static powerUpTypes = {
         speedUp: "speedUp",
-        sizeUp: "sizeUp"
+        sizeUp: "sizeUp",
+        bomb: "bomb"
     };
 
     constructor(x, y, type) {
@@ -24,6 +25,12 @@ class PowerUp {
         }
         else if(this.type == PowerUp.powerUpTypes.sizeUp) {
             image(this.image, this.x-this.radius*1.1, this.y-this.radius*0.85, this.radius*2.2, this.radius*2.3);
+        }
+        else if(this.type == PowerUp.powerUpTypes.bomb) {
+            image(this.image, this.x-this.radius, this.y-this.radius, this.radius*2, this.radius*2);
+        }
+        else {
+            image(this.image, this.x-this.radius, this.y-this.radius, this.radius*2, this.radius*2);
         }
         
         pop();

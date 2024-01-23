@@ -39,8 +39,14 @@ class Board {
         
         for(let powerUp of this.powerUps) {
             if(this.isPointInsideCircle(powerUp.x, powerUp.y, player.x, player.y, player.radius)) {
-                player.applyPowerup(powerUp);
-                this.removePowerUp(powerUp);
+                if(powerUp.type != PowerUp.powerUpTypes.bomb) {
+                    player.applyPowerup(powerUp);
+                    this.removePowerUp(powerUp);
+                }
+                else {
+                    this.removePowerUp(powerUp);
+                    this.claim(player, powerUp.x, powerUp.y, 0.2);
+                }
             }
         }
     }
