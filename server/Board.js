@@ -1,10 +1,26 @@
+let PowerUp = require("./PowerUp");
+
 class Board {
     constructor(size) {
         this.size = size;
         this.board = Array(this.size.x).fill().map(()=>Array(this.size.y).fill());
+        
+        this.powerUps = [];
+    }
+    
+    update() {
+        for(let powerUp of this.powerUps) {
+            powerUp.reducePersistence();
+            if(powerUp.remove)
+                this.removePowerUp(powerUp);
+        }
+    }
+    
+    removePowerUp(powerUp) {
+        this.powerUps = this.powerUps.filter(item => item !== powerUp);
     }
 
-    claim(x, y, radius, id) {
+    claim(player, x, y, radius) {
         // X, Y and radius between 0 and 1
         let gridX = this.size.x*x
         let gridY = this.size.y*y
@@ -16,10 +32,38 @@ class Board {
                 if( i>=0 && i<this.size.x &&
                     j>=0 && j<this.size.y &&
                     this.isPointInsideCircle(i+0.5, j+0.5, gridX, gridY, gridRadius)) {
-                    this.board[i][j] = id;
+                    this.board[i][j] = player.id;
                 }
             }
         }
+        
+        for(let powerUp of this.powerUps) {
+            if(this.isPointInsideCircle(powerUp.x, powerUp.y, player.x, player.y, player.radius)) {
+                if(powerUp.type != PowerUp.powerUpTypes.bomb) {
+                    player.applyPowerup(powerUp);
+                    this.removePowerUp(powerUp);
+                }
+                else {
+                    this.removePowerUp(powerUp);
+                    this.claim(player, powerUp.x, powerUp.y, 0.2);
+                }
+            }
+        }
+    }
+    
+    spawnRandomPowerUp() {
+        let types = Array.from(Object.keys(PowerUp.powerUpTypes));
+        let rand = Math.floor(Math.random()*types.length);
+        let type = PowerUp.powerUpTypes[types[rand]];
+        
+        let powerUp = new PowerUp(
+            Math.random(),
+            Math.random(),
+            type,
+            PowerUp.POWERUP_PERSISTENCE,
+            PowerUp.POWERUP_DURATION
+        )
+        this.powerUps.push(powerUp);
     }
     
     calculateScores() {

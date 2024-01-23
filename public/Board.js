@@ -6,10 +6,19 @@ class Board {
         this.y = y;
         this.width = width;
         this.height = height;
+        
+        this.powerUps = [];
     }
     
     update(board) {
         this.board = board;
+    }
+    
+    updatePowerUps(powerUps) {
+        this.powerUps = [];
+        for(let powerUp of powerUps) {
+            this.powerUps.push(new PowerUp(powerUp.x, powerUp.y, powerUp.type));
+        }
     }
     
     claim(x, y, radius, id) {
@@ -51,5 +60,9 @@ class Board {
             }
         }
         pop();
+        
+        for(let powerUp of this.powerUps) {
+            powerUp.draw(this);
+        }
     }
 }

@@ -1,18 +1,19 @@
 const express = require("express");
 const socket = require('socket.io');
 const app = express();
-const MINPLAYERS = 1;
-const MAXPLAYERS = 2;
-const TIMERLENGTH = 6000;
-
-let Player = require("./Player");
-let Board = require("./Board");
-
 let server = app.listen(80);
 console.log('The server is now running at http://localhost/');
 app.use(express.static("public"));
 
+
 let io = socket(server);
+const MINPLAYERS = 1;
+const MAXPLAYERS = 2;
+const TIMERLENGTH = 3600;
+
+let PowerUp = require("./PowerUp");
+let Player = require("./Player");
+let Board = require("./Board");
 
 const gameStates = {
 	init: "init",
@@ -24,12 +25,11 @@ const splatColors = [{r: 254, g: 135, b: 209}, {r: 166, g: 198, b: 82}];
 
 let gameState = gameStates.init;
 let timer = 0;
-let results;
 
 let players = [];
 let playersSockets = {};
 
-let boardSize = {x:60, y:34};
+let boardSize = {x:50, y:50};
 let board = new Board(boardSize);
 let colormap = new Map();
 
@@ -70,7 +70,7 @@ io.sockets.on("connection", socket => {
     });
     
     socket.on('fillBoard', function (data) {
-      board.claim(0, 0, 50, players[0].id);
+      board.claim(players[0], 0, 0, 10);
     });
     
     socket.on("disconnect", reason => {
@@ -131,8 +131,16 @@ function updateGame() {
   
   // Update game state
   if(gameState == gameStates.game) {
+    
+    if(Math.floor(Math.random() * PowerUp.POWERUP_FREQUENCY) == 0) {
+      board.spawnRandomPowerUp();
+    }
+    
     for (let i = 0; i < players.length; i++) {
-      board.claim(players[i].x, players[i].y, players[i].radius, players[i].id);
+      let player = players[i];
+      board.claim(player, player.x, player.y, player.radius);
+      player.update();
+      board.update();
     }
     
     if(timer > 0)
@@ -148,8 +156,11 @@ function updateGame() {
 }
 
 function sendBoard() {
-  jsonMap = JSON.stringify(Array.from(colormap));
-  io.sockets.emit("updateBoard", {board:board.board, colormap:jsonMap});
+  if(gameState == gameStates.game) {
+    let jsonMap = JSON.stringify(Array.from(colormap));
+    let jsonPowerUps = JSON.stringify(board.powerUps);
+    io.sockets.emit("updateBoard", {board:board.board, powerUps: jsonPowerUps, colormap:jsonMap});
+  }
 }
 
 function sendScores() {
