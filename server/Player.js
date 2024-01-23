@@ -44,9 +44,11 @@ class Player {
         this.removePowerUp(powerUp);
       }
     }
-    
-    let direction = this.direction;
-    if(direction != undefined) {
+                     
+    if(this.moveCoords != undefined) {
+      let direction = {x:this.moveCoords.x-this.x,
+                       y:this.moveCoords.y-this.y};
+        
       let length = Math.sqrt(direction.x*direction.x+direction.y*direction.y);
       if(length >= this.radius/10) {
         this.x += direction.x/length * this.speed;
@@ -57,9 +59,9 @@ class Player {
     }
   }
 
-  move(direction) {
-    if(direction != null) {
-      this.direction = direction;
+  move(coords) {
+    if(coords != null) {
+      this.moveCoords = coords;
     }
   }
 }

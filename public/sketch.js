@@ -4,6 +4,8 @@ p5.disableFriendlyErrors = true;
 
 var socket;
 
+var cutieFont;
+
 var timer;
 
 var playerId;
@@ -47,11 +49,15 @@ function preload() {
   assets.set("sizeUp", loadImage('assets/powerups/sizeUp.png'));
   assets.set("speedUp", loadImage('assets/powerups/speedUp.png'));
   assets.set("bomb", loadImage('assets/powerups/bomb.png'));
+  
+  cutieFont = loadFont('assets/CutieMolly_Regular.ttf');
 }
 
 function setup() {
   createCanvas(WIDTH, HEIGHT);
-  frameRate()
+  frameRate(75);
+  
+  textFont(cutieFont);
   
   socket = io.connect('192.168.0.45'); // frajelly.raspberryip.com | localhost
   socket.on('connect', () => {
@@ -181,8 +187,10 @@ function drawResultsTable() {
   var sorted = Array.from(results).sort((a, b) => b[1] - a[1]);
   // Winner
   textSize(HEIGHT/20);
-  text(getPlayer(sorted[0][0]).name+": "+Math.round(sorted[0][1]*100)+"%",
+  var winner = getPlayer(sorted[0][0]);
+  text(winner.name+": "+Math.round(sorted[0][1]*100)+"%",
                   WIDTH*0.35, HEIGHT*0.4, WIDTH*0.3, HEIGHT*0.1);
+  image(winner.image, WIDTH*0.35, HEIGHT*0.4, WIDTH*0.1, HEIGHT*0.08);
   
   // Other(s)
   textSize(HEIGHT/40);
@@ -226,7 +234,7 @@ function processMove() {
     // This updates the player position before it comes back from the server, sort of a prediction
     player.move(direction);
     
-    socket.emit('move', move);
+    socket.emit('move', {x:(mouseX-board.x)/board.width, y:((mouseY-board.y)/board.height)});
     
     // This shows claimed spots for the player before they come back from the server
     board.claim(player.x, player.y, player.radius, player.id);
@@ -243,7 +251,7 @@ function updatePlayers(serverPlayers) {
     }
     else {
       let localPlayer = players[i]
-      localPlayer.updateStats(playerFromServer, splats)
+      localPlayer.update(playerFromServer, splats);
     }
   }
 }
