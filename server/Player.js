@@ -31,16 +31,18 @@ class Player {
       this.speed /= powerUp.factor;
     }
     else if(powerUp.type == PowerUp.powerUpTypes.sizeUp) {
-      this.radius *= powerUp.factor;
+      this.radius /= powerUp.factor;
     }
+    
     this.powerUps = this.powerUps.filter(item => item !== powerUp);
   }
   
   update() {
     for(let powerUp of this.powerUps) {
-      powerUp.update();
-      if(powerUp.remove)
+      powerUp.reduceDuration();
+      if(powerUp.remove) {
         this.removePowerUp(powerUp);
+      }
     }
   }
 

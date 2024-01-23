@@ -44,6 +44,8 @@ function preload() {
   assets.set("button", loadImage('assets/button.png'));
   assets.set("art-top", loadImage('assets/background-top.png'));
   assets.set("art-bottom", loadImage('assets/background-bot.png'));
+  assets.set("sizeUp", loadImage('assets/powerups/sizeUp.png'));
+  assets.set("speedUp", loadImage('assets/powerups/speedUp.png'));
 }
 
 function setup() {
@@ -289,6 +291,10 @@ function setBoardSize(size) {
 function updateBoard(data) {
   board.update(data.board);
   colormap = new Map(JSON.parse(data.colormap));
+  
+  powerUps = JSON.parse(data.powerUps);
+  
+  board.updatePowerUps(powerUps);
 }
 
 function updateScores(scores) {

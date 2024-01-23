@@ -7,6 +7,18 @@ class Board {
         
         this.powerUps = [];
     }
+    
+    update() {
+        for(let powerUp of this.powerUps) {
+            powerUp.reducePersistence();
+            if(powerUp.remove)
+                this.removePowerUp(powerUp);
+        }
+    }
+    
+    removePowerUp(powerUp) {
+        this.powerUps = this.powerUps.filter(item => item !== powerUp);
+    }
 
     claim(player, x, y, radius) {
         // X, Y and radius between 0 and 1
@@ -28,7 +40,7 @@ class Board {
         for(let powerUp of this.powerUps) {
             if(this.isPointInsideCircle(powerUp.x, powerUp.y, player.x, player.y, player.radius)) {
                 player.applyPowerup(powerUp);
-                this.powerUps = this.powerUps.filter(item => item !== powerUp);
+                this.removePowerUp(powerUp);
             }
         }
     }

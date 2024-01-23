@@ -140,6 +140,7 @@ function updateGame() {
       let player = players[i];
       board.claim(player, player.x, player.y, player.radius);
       player.update();
+      board.update();
     }
     
     if(timer > 0)
@@ -155,9 +156,11 @@ function updateGame() {
 }
 
 function sendBoard() {
-  let jsonMap = JSON.stringify(Array.from(colormap));
-  let jsonPowerUps = JSON.stringify(board.powerUps);
-  io.sockets.emit("updateBoard", {board:board.board, powerUps: jsonPowerUps, colormap:jsonMap});
+  if(gameState == gameStates.game) {
+    let jsonMap = JSON.stringify(Array.from(colormap));
+    let jsonPowerUps = JSON.stringify(board.powerUps);
+    io.sockets.emit("updateBoard", {board:board.board, powerUps: jsonPowerUps, colormap:jsonMap});
+  }
 }
 
 function sendScores() {

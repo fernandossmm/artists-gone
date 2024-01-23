@@ -1,11 +1,12 @@
 class PowerUp {
-    static POWERUP_FREQUENCY = 20;
-    static POWERUP_PERSISTENCE = 500;
+    static POWERUP_FREQUENCY = 300;
+    static POWERUP_PERSISTENCE = 300;
     static POWERUP_DURATION = 180;
 
     static powerUpTypes = {
         speedUp: "speedUp",
-        sizeUp: "sizeUp"
+        sizeUp: "sizeUp",
+        bomb: "bomb"
     };
 
     constructor(x, y, type, persistence, duration) {
@@ -13,16 +14,23 @@ class PowerUp {
         this.y = y;
         this.type = type;
         this.factor = 1.5;
-        this.persistence = persistence;
+        this.persistence = persistence; // Horrible name
         this.duration = duration;
         this.remove = false;
     }
 
-    update() {
+    reducePersistence() {
+        this.persistence -= 1;
+        
+        if(this.persistence <= 0)
+            this.remove = true;
+    }
+
+    reduceDuration() {
         this.duration -= 1;
         
         if(this.duration <= 0)
-        this.remove = true;
+            this.remove = true;
     }
 }
 
