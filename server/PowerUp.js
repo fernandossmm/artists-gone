@@ -1,7 +1,7 @@
 class PowerUp {
     static POWERUP_FREQUENCY = 200;
     static POWERUP_PERSISTENCE = 300;
-    static POWERUP_DURATION = 180;
+    static POWERUP_DURATION = 240;
 
     static powerUpTypes = {
         speedUp: "speedUp",

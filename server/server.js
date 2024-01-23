@@ -33,8 +33,9 @@ let boardSize = {x:50, y:50};
 let board = new Board(boardSize);
 let colormap = new Map();
 
-setInterval(updateGame, 16);
-setInterval(sendBoard, 100);
+setInterval(updateGame, 13);
+setInterval(sendBoard, 250);
+setInterval(updatePlayers, 20);
 
 io.sockets.on("connection", socket => {
   if(players.length < MAXPLAYERS && gameState == gameStates.init) {
@@ -48,10 +49,10 @@ io.sockets.on("connection", socket => {
     socket.emit("boardSize", boardSize);
     console.log(`New connection ${socket.id}`);
 
-    socket.on('move', function (data) {
+    socket.on('move', function (coords) {
       let player = getPlayer(socket.id);
 
-      player.move(data.direction);
+      player.move(coords);
     });
     
     socket.on('ready', function (data) {
@@ -117,9 +118,11 @@ function updateGame() {
     for (let i = 0; i < players.length; i++) {
       if(players[i].ready) {
         players[i].number = numOfReadyPlayers;
+        players[i].name = splatNames[numOfReadyPlayers%splatNames.length];
+        players[i].color = splatColors[numOfReadyPlayers%splatColors.length];
+        colormap.set(players[i].id, players[i].color);
         numOfReadyPlayers += 1;
       }
-        
     }
     
     if(numOfReadyPlayers >= MINPLAYERS &&
@@ -152,7 +155,11 @@ function updateGame() {
     }
   }
   
-  io.sockets.emit("heartbeat", {state:gameState, timer:timer, players:players});
+  io.sockets.emit("heartbeat", {state:gameState, timer:timer});
+}
+
+function updatePlayers() {
+  io.sockets.emit("updatePlayers", {players: players});
 }
 
 function sendBoard() {

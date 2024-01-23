@@ -12,9 +12,8 @@ class Player {
   }
   
   move(direction) {
-    if(direction != null) {
+    if(direction != undefined) {
       let length = Math.sqrt(direction.x*direction.x+direction.y*direction.y);
-      
       if(length >= this.radius/10) {
         this.x += direction.x/length * this.speed;
         this.y += direction.y/length * this.speed;
@@ -31,7 +30,7 @@ class Player {
     this.y = player.y;
     this.radius = player.radius;
     this.speed = player.speed;
-    this.image = splats[player.number%splats.length];
+    this.image = splats[this.number%splats.length];
   }
 
   draw(board) {
