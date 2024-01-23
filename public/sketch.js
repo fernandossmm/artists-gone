@@ -40,6 +40,7 @@ function preload() {
   assets.set("wood", loadImage('assets/background.jpg'));
   assets.set("canvas", loadImage('assets/canvas.jpg'));
   assets.set("frame", loadImage('assets/frame.png'));
+  assets.set("title", loadImage('assets/title.png'));
   assets.set("button", loadImage('assets/button.png'));
   assets.set("art-top", loadImage('assets/background-top.png'));
   assets.set("art-bottom", loadImage('assets/background-bot.png'));
@@ -96,10 +97,15 @@ function showInit() {
   let top = assets.get("art-top");
   image(top, 0, 0, WIDTH, WIDTH/top.width*top.height);
   
+  let title = assets.get("title")
+  let titleScaling = 1.0;
+  let titleW = HEIGHT*0.4/title.height*title.width*titleScaling
+  image(title, WIDTH/2-titleW/2, HEIGHT*0.24, titleW, HEIGHT*0.4*titleScaling);
+  
   let bot = assets.get("art-bottom");
-  let scaling = 0.8;
-  let botH = WIDTH/bot.width*bot.height*scaling
-  image(bot, 0, HEIGHT-botH, WIDTH*scaling, botH);
+  let botScaling = 0.8;
+  let botH = WIDTH/bot.width*bot.height*botScaling
+  image(bot, 0, HEIGHT-botH, WIDTH*botScaling, botH);
   
   readyButton.draw();
 }
@@ -338,12 +344,13 @@ Button.prototype.draw=function(){
   stroke(230,230,230, 150);
   //rect(this.x,this.y,this.width,this.height);
   image(assets.get("button"), this.x-this.width*0.05,this.y-this.height*0.05,this.width*1.1,this.height*1.2);
-  textSize(this.height*0.3);
+  textSize(this.height*0.28);
   textAlign(CENTER, CENTER);
   fill(255);
-  noStroke();
+  stroke(120, 120, 120, 60);
+  strokeWeight(6);
   textStyle(BOLD);
-  text(this.text, this.x+this.width*0.02, this.y-this.height*0.04, this.width, this.height);
+  text(this.text, this.x+this.width*0.02, this.y-this.height*0.025, this.width, this.height);
   stroke(230,230,230, 40);
   pop();
 }
