@@ -46,6 +46,8 @@ function preload() {
   assets.set("button", loadImage('assets/button.png'));
   assets.set("art-top", loadImage('assets/background-top.png'));
   assets.set("art-bottom", loadImage('assets/background-bot.png'));
+  assets.set("resultsFrame", loadImage('assets/resultsFrame.png'));
+  assets.set("papers", loadImage('assets/papers.png'));
   assets.set("sizeUp", loadImage('assets/powerups/sizeUp.png'));
   assets.set("speedUp", loadImage('assets/powerups/speedUp.png'));
   assets.set("bomb", loadImage('assets/powerups/bomb.png'));
@@ -115,6 +117,18 @@ function showInit() {
   let botH = WIDTH/bot.width*bot.height*botScaling
   image(bot, 0, HEIGHT-botH, WIDTH*botScaling, botH);
   
+  let papers = assets.get("papers");
+  image(papers, WIDTH*0.75, HEIGHT*0.6, WIDTH*0.3, HEIGHT*0.4);
+  
+  push();
+  textSize(HEIGHT*0.029);
+  translate(WIDTH*0.798, HEIGHT*0.65, WIDTH*0.19, HEIGHT*0.4);
+  rotate(0.074);
+  text("\nThe artist has\ngone away!\nA couple of splats\ntake the chance to play\nCollect powerups and\nmess with the canvas!", 0, 0, WIDTH*0.18, HEIGHT*0.4);
+  pop();
+  "The artist has gone away!"
+  "A couple of splats take the chance to play!"
+  "Collect powerups and mess with the canvas"
   readyButton.draw();
 }
 
@@ -140,7 +154,7 @@ function showResults() {
     drawTimer();
   }
   
-  drawResultsTable()
+  drawResultsTable();
 }
 
 function drawTimer() {
@@ -173,31 +187,41 @@ function drawBoard(board) {
 
 function drawResultsTable() {
   push();
-  fill(0, 0, 0, 200);
+  
+  // Table
+  fill(250, 250, 250, 180);
   strokeWeight(WIDTH*0.005);
-  rect(WIDTH*0.3, HEIGHT*0.2, WIDTH*0.4, HEIGHT*0.6);
+  rect(WIDTH*0.325, HEIGHT*0.1, WIDTH*0.35, HEIGHT*0.8);
   textSize(HEIGHT/40);
   textAlign(CENTER);
-  fill(255);
-  strokeWeight(4);
+  
+  // Frame
+  let frame = assets.get("resultsFrame");
+  image(frame, WIDTH*0.25, 0, WIDTH*0.5, HEIGHT*0.95);
   
   // Title
-  text("And the winner is...", WIDTH*0.35, HEIGHT*0.3, WIDTH*0.3, HEIGHT*0.1);
+  // text("And the winner is...", WIDTH*0.35, HEIGHT*0.3, WIDTH*0.3, HEIGHT*0.1);
   
   var sorted = Array.from(results).sort((a, b) => b[1] - a[1]);
   // Winner
   textSize(HEIGHT/20);
+  fill(238, 116, 187);
+  strokeWeight(4);
   var winner = getPlayer(sorted[0][0]);
   text(winner.name+": "+Math.round(sorted[0][1]*100)+"%",
                   WIDTH*0.35, HEIGHT*0.4, WIDTH*0.3, HEIGHT*0.1);
-  image(winner.image, WIDTH*0.35, HEIGHT*0.4, WIDTH*0.1, HEIGHT*0.08);
+  image(winner.image, WIDTH*0.39, HEIGHT*0.39, WIDTH*0.038, HEIGHT*0.06);
   
   // Other(s)
   textSize(HEIGHT/40);
+  textAlign(CENTER);
   for(var i=1; i < sorted.length; i++) {
-    if(sorted[i][1] != undefined && getPlayer(sorted[i][0]) != undefined)
-      text(getPlayer(sorted[i][0]).name+": "+Math.round(sorted[i][1]*100)+"%",
-            WIDTH*0.35, HEIGHT*0.45+i*HEIGHT*0.05, WIDTH*0.3, HEIGHT*0.1);
+    if(sorted[i][1] != undefined && getPlayer(sorted[i][0]) != undefined) {
+      let player = getPlayer(sorted[i][0]);
+      image(player.image, WIDTH*0.43, HEIGHT*0.48, WIDTH*0.03, HEIGHT*0.05);
+      text(player.name+": "+Math.round(sorted[i][1]*100)+"%",
+            0, HEIGHT*0.45+i*HEIGHT*0.05, WIDTH, HEIGHT*0.1);
+    }
   }
   pop();
   

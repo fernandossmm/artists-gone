@@ -7,7 +7,7 @@ app.use(express.static("public"));
 
 
 let io = socket(server);
-const MINPLAYERS = 1;
+const MINPLAYERS = 2;
 const MAXPLAYERS = 2;
 const TIMERLENGTH = 3600;
 
@@ -47,7 +47,7 @@ io.sockets.on("connection", socket => {
     playersSockets[socket.id]=socket;
     colormap.set(socket.id, splatColors[playerNumber]);
     socket.emit("boardSize", boardSize);
-    console.log(`New connection ${socket.id}`);
+    console.log(`New connection ${socket.id} - `+players.length+" current connections");
 
     socket.on('move', function (coords) {
       let player = getPlayer(socket.id);
