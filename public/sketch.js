@@ -61,7 +61,7 @@ function setup() {
   
   textFont(cutieFont);
   
-  socket = io.connect('192.168.0.45'); // frajelly.raspberryip.com | localhost
+  socket = io.connect('localhost'); // localhost
   socket.on('connect', () => {
     playerId = socket.id; // an alphanumeric id
     $("#loader").fadeOut("slow");
