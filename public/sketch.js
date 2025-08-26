@@ -61,7 +61,7 @@ function setup() {
   
   textFont(cutieFont);
   
-  socket = io.connect('localhost'); // localhost
+  socket = io.connect('cosmos-8-nov.resiz.es'); // localhost
   socket.on('connect', () => {
     playerId = socket.id; // an alphanumeric id
     $("#loader").fadeOut("slow");

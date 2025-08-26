@@ -1,7 +1,7 @@
 const express = require("express");
 const socket = require('socket.io');
 const app = express();
-let server = app.listen(80);
+let server = app.listen(3000);
 console.log('The server is now running at http://localhost/');
 app.use(express.static("public"));
 
