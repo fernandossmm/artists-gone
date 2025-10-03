@@ -5,7 +5,7 @@
   <br>
 </h1>
 
-### Winner of the EII Techfest Game jam 2024
+### Winner of the EII Techfest Game Jam 2024
 
 ![node.js](https://img.shields.io/badge/node.js-6DA55F?style=flat&logo=node.js&logoColor=white) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=flat&logo=javascript&logoColor=%23F7DF1E) ![p5js](https://img.shields.io/badge/p5.js-ED225D?style=flat&logo=p5.js&logoColor=FFFFFF)
 
